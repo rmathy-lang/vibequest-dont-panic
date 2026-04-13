@@ -83,4 +83,9 @@ Built With Vibe CodingThis entire game was vibe-coded in one sitting using plain
 Exactly what the game teaches you to do.Made with  for L&D teams and coding newbies everywhere. Contributing & FeedbackFound a bug? Want a new room? Just open an issue or PR.Or reply in the original thread and we’ll keep vibing the next feature together.Don’t panic. Just vibe.— Richard Mathy + Grok (your senior software engineer sidekick)
 
 
+**Copy everything above** (including the ```markdown fences) and paste it into a new file called `README.md` in the root of your repo.
+
+Then commit & push — GitHub will automatically show this beautiful readme on the repo homepage.
+
+Want me to also give you a `CONTRIBUTING.md` or a list of the next 5 rooms/puzzles we can add next? Just say the word and we keep the vibes flowing! 🪐
 
