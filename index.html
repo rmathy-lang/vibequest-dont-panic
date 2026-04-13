@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-zinc-950 text-emerald-300 font-mono">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VibeQuest: Don't Panic Edition</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background: linear-gradient(180deg, #18181b, #27272a); }
+    .terminal { font-family: 'Courier New', monospace; }
+    .output { scrollbar-width: thin; scrollbar-color: #10b981 #27272a; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+  <div class="max-w-5xl mx-auto w-full flex-1 flex flex-col p-4">
+    <!-- Header -->
+    <div class="flex justify-between items-center border-b border-emerald-500 pb-4 mb-6">
+      <h1 class="text-4xl font-bold flex items-center gap-3">
+        <span class="text-yellow-400">🪐</span> VibeQuest
+        <span class="text-2xl text-zinc-400">— Don't Panic Edition —</span>
+      </h1>
+      <div class="text-xs bg-zinc-900 px-3 py-1 rounded border border-emerald-500">
+        Antigravity Agent v42 • Connected
+      </div>
+    </div>
+
+    <!-- Game Area -->
+    <div class="flex flex-1 gap-6">
+      <!-- Story -->
+      <div class="flex-1 flex flex-col bg-zinc-900 rounded-2xl border border-emerald-500/30 overflow-hidden">
+        <div id="room-title" class="bg-zinc-800 px-6 py-3 font-bold text-xl border-b border-emerald-500"></div>
+        
+        <div id="output" class="output flex-1 p-6 overflow-y-auto text-emerald-100 leading-relaxed space-y-4 text-lg"></div>
+
+        <!-- Input -->
+        <div class="border-t border-emerald-500 bg-black p-4 flex items-center gap-3">
+          <span class="text-emerald-400 font-bold">&gt;</span>
+          <input id="command-input" 
+                 type="text" 
+                 class="flex-1 bg-transparent outline-none text-emerald-200 text-lg placeholder-zinc-500"
+                 placeholder="Type your vibe... (e.g. 'build me a bridge' or 'go north')">
+          <button onclick="processCommand()" 
+                  class="bg-emerald-500 hover:bg-emerald-600 px-8 py-2 rounded-xl text-black font-bold transition">
+            VIBE
+          </button>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="w-72 bg-zinc-900 rounded-2xl border border-emerald-500/30 p-6 flex flex-col">
+        <h2 class="font-bold mb-3 text-yellow-400">📦 INVENTORY</h2>
+        <div id="inventory" class="flex-1 text-sm space-y-2"></div>
+        
+        <div class="mt-auto pt-6 border-t border-zinc-700">
+          <h2 class="font-bold mb-2 text-yellow-400">🧠 PROMPT TIP</h2>
+          <div id="tip" class="text-xs leading-tight bg-zinc-800 p-3 rounded-xl"></div>
+        </div>
+        
+        <div class="text-[10px] mt-8 text-center text-zinc-500">
+          Antigravity Agent is watching.<br>
+          Be specific. Be bold. Don't panic.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============== GAME DATA ==============
+    const gameState = {
+      location: "syntaxSwamp",
+      inventory: [],
+      flags: { hasBridge: false, learnedSpecificity: false }
+    };
+
+    const rooms = {
+      syntaxSwamp: {
+        title: "Syntax Swamp 🪐",
+        desc: "You're knee-deep in glowing green syntax errors. A rickety rope bridge dangles over a pit of 404s. To the north is a dense Agent Forest. Your Antigravity Agent hovers nearby, waiting for a vibe.",
+        exits: { north: "agentForest" },
+        vibes: {
+          "build.*bridge": () => {
+            gameState.flags.hasBridge = true;
+            addOutput("✅ Agent: Bridge constructed from pure vibes and Tailwind classes! The pit is now crossable.");
+            addOutput("💡 PROMPT WIN: You said exactly what you wanted. Specificity = power.");
+            gameState.flags.learnedSpecificity = true;
+            updateTip();
+          }
+        }
+      },
+      agentForest: {
+        title: "Agent Forest 🌲",
+        desc: "Ancient trees made of code branches whisper requirements. The Antigravity Agent is stronger here. Paths lead south (back to swamp) and east (to the Launchpad).",
+        exits: { south: "syntaxSwamp", east: "launchpad" },
+        vibes: {
+          "make.*fly|launch.*ship": () => {
+            if (!gameState.flags.hasBridge) {
+              addOutput("❌ Agent: I need a way across the swamp first! Vibe me a bridge.");
+              return;
+            }
+            addOutput("🚀 Agent: Spaceship assembled! You just vibe-coded your first deployment.");
+            addOutput("🎓 Lesson: Good vibes include constraints, tech stack, and success criteria.");
+            gameState.inventory.push("Mini App");
+            updateInventory();
+          }
+        }
+      },
+      launchpad: {
+        title: "Launchpad to Production Planet 🌍",
+        desc: "A gleaming launchpad. Your mini app is ready to fly. Type 'deploy' to win... or keep vibing to make it even better.",
+        exits: {},
+        vibes: {
+          "deploy": () => {
+            addOutput("🎉 YOU WIN! You vibe-coded your way to Production Planet using Google Antigravity principles.");
+            addOutput("🏆 Real-world lesson: The same workflow works in Antigravity.google right now.");
+            document.getElementById("command-input").disabled = true;
+          }
+        }
+      }
+    };
+
+    // ============== HELPER FUNCTIONS ==============
+    function addOutput(text, isAgent = true) {
+      const output = document.getElementById("output");
+      const line = document.createElement("div");
+      line.className = isAgent ? "pl-6 border-l-2 border-yellow-400" : "";
+      line.innerHTML = text;
+      output.appendChild(line);
+      output.scrollTop = output.scrollHeight;
+    }
+
+    function updateInventory() {
+      const inv = document.getElementById("inventory");
+      inv.innerHTML = gameState.inventory.length 
+        ? gameState.inventory.map(item => `<div class="px-3 py-1 bg-zinc-800 rounded-lg">📦 ${item}</div>`).join("")
+        : `<div class="text-zinc-500 italic">Nothing yet... vibe something!</div>`;
+    }
+
+    function updateTip() {
+      const tipEl = document.getElementById("tip");
+      if (gameState.flags.learnedSpecificity) {
+        tipEl.innerHTML = `💡 Next level: Add details!<br><span class="text-emerald-400">"Build a glowing neon button that says 'Vibe Code' and pulses on hover using Tailwind"</span>`;
+      } else {
+        tipEl.textContent = "Try being ultra-specific in your vibes. Agents love details.";
+      }
+    }
+
+    function changeRoom(newRoom) {
+      if (!rooms[newRoom]) return;
+      gameState.location = newRoom;
+      document.getElementById("room-title").textContent = rooms[newRoom].title;
+      addOutput(`<span class="text-yellow-400">📍 ${rooms[newRoom].title}</span><br>${rooms[newRoom].desc}`, false);
+    }
+
+    function processCommand() {
+      const input = document.getElementById("command-input");
+      const cmd = input.value.trim().toLowerCase();
+      if (!cmd) return;
+      
+      addOutput(`&gt; ${cmd}`, false);
+
+      const room = rooms[gameState.location];
+      
+      // Standard adventure commands
+      if (cmd === "look" || cmd === "l") {
+        addOutput(room.desc, false);
+      } 
+      else if (cmd.startsWith("go ")) {
+        const dir = cmd.slice(3).trim();
+        if (room.exits[dir]) {
+          changeRoom(room.exits[dir]);
+        } else {
+          addOutput("❌ No path that way. Try 'north', 'south', etc.");
+        }
+      } 
+      else if (cmd === "inventory" || cmd === "i") {
+        addOutput("You are carrying: " + (gameState.inventory.join(", ") || "nothing"));
+      }
+      // Vibe commands (the teaching heart)
+      else {
+        let matched = false;
+        for (let pattern in room.vibes) {
+          if (new RegExp(pattern).test(cmd)) {
+            room.vibes[pattern]();
+            matched = true;
+            break;
+          }
+        }
+        if (!matched) {
+          addOutput("🤖 Antigravity Agent: Interesting vibe! I can work with that, but I need more details to execute perfectly. Try again with specifics.");
+        }
+      }
+
+      input.value = "";
+    }
+
+    // ============== START GAME ==============
+    function initGame() {
+      // Tailwind script already loaded via CDN
+      document.getElementById("room-title").textContent = rooms.syntaxSwamp.title;
+      addOutput("🌌 <strong>Welcome to VibeQuest!</strong><br>You are a fledgling vibe coder. Your Antigravity Agent is ready.<br>Type commands like <span class='text-yellow-400'>go north</span> or just vibe in plain English: <span class='text-yellow-400'>build me a bridge</span>", false);
+      addOutput(rooms.syntaxSwamp.desc, false);
+      updateInventory();
+      updateTip();
+      
+      // Enter key support
+      document.getElementById("command-input").addEventListener("keypress", (e) => {
+        if (e.key === "Enter") processCommand();
+      });
+    }
+
+    window.onload = initGame;
+  </script>
+</body>
+</html>
